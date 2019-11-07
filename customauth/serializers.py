@@ -1,8 +1,11 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from customauth.models import User
 import json
+from .signature_check import Address
+from django.core.exceptions import ObjectDoesNotExist
+
 
 class ObtainTokenPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -10,11 +13,7 @@ class ObtainTokenPairSerializer(TokenObtainPairSerializer):
         return RefreshToken.for_user(user)
 
     def validate(self, attrs):
-        # data = super().validate(attrs)
-        print(self.context['request'].user)
         user = self.context['request'].user
-        print(user)
-        print(self.context['request'].data)
         data = {'refresh' : '', 'access' : ''}
         refresh = self.get_token(user)
 
@@ -27,22 +26,34 @@ class ObtainTokenPairSerializer(TokenObtainPairSerializer):
 class SignatureObtainTokenPairSerializer(serializers.Serializer):
 
     def validate(self, attrs):
-        print('wow')
-        signature = None
+        signature, nonce = None, None
         request = self.context.get("request")
         signature = request.data.get('signature')
-        if not signature:
-            print('no signature')
-            return None
-        # try:
-        #     signature = request.values('signature')
-        #     print(signature)
-        # except Exception as e:
-        #     print(e)
-        #     return None
+        nonce = request.data.get('nonce')
+        if not signature or not nonce:
+            raise exceptions.AuthenticationFailed(detail="signature and nonce fields required", code=400)
+            
+        # Get address from signature and nonce
+        address = Address.fromSignatureAndNonce(self, signature=signature, nonce=nonce)
+        #TODO Do a check that it's a valid ethereum address 
+
+        # Retrive user with that address, or create a new user with that address
+        try: 
+            user = User.objects.get(public_address=address)
+        except ObjectDoesNotExist:
+            user = User.objects.create_user(username=address, public_address=address)
+            user.save()
+            user.set_unusable_password()
+            user.save()
+
+        # Checking nonce provided is the same as users
+        if not user.nonce == int(nonce):
+            raise exceptions.AuthenticationFailed(detail="nonce missmatch", code=400)
         
-        # user = self.context['request'].user
-        user = User.objects.get(pk=1)
+        # Increment user nonce 
+        # TODO Uncomment this when the rest of the infrastructure is there
+        # user.nonce = user.nonce + 1
+        # user.save()
         
         refresh = RefreshToken.for_user(user)
         data = {'refresh' : '', 'access' : ''}
@@ -51,3 +62,8 @@ class SignatureObtainTokenPairSerializer(serializers.Serializer):
 
         return data
 
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['id', 'public_address', 'nonce']

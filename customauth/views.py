@@ -2,8 +2,9 @@ from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenViewBase
-from customauth.serializers import ObtainTokenPairSerializer, SignatureObtainTokenPairSerializer
+from customauth.serializers import ObtainTokenPairSerializer, SignatureObtainTokenPairSerializer, UserSerializer
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from customauth.models import User
 
 
 # Create your views here.
@@ -24,5 +25,8 @@ class SignatureObtainTokenPairView(generics.GenericAPIView):
             raise InvalidToken(e.args[0])
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        # return Response(self.data, status=status.HTTP_200_OK)
 
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'public_address'

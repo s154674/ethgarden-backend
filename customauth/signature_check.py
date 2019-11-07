@@ -3,5 +3,5 @@ from eth_account import Account
 
 class Address:
     def fromSignatureAndNonce(self, signature, nonce):
-        message = encode_defunct(text=("ethgarden.io " + str(nonce)))
+        message = encode_defunct(text=(str(nonce))) 
         return(Account.recover_message(message, signature=signature))
