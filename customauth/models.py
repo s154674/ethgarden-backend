@@ -5,3 +5,4 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     public_address = models.CharField(max_length=140, unique=True)
     nonce = models.IntegerField(default=1)
+    greens = models.PositiveIntegerField(default=0)
