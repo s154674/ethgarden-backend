@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from customauth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from hexbytes import HexBytes
+from web3 import Web3
 
 class Command(BaseCommand):
 

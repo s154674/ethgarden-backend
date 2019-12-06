@@ -7,6 +7,7 @@ from plants.serializers import PlantSerializer
 # from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from plants.models import Plant
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 
 # Create your views here.

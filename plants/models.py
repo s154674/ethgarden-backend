@@ -9,6 +9,7 @@ class Plant(models.Model):
     seed = models.CharField(max_length=78, default="")
     value = models.CharField(max_length=78)
     erc20_address = models.CharField(max_length=42)
+    greens_per_block = models.SmallIntegerField(default=10)
 
     class Meta:
         indexes = [

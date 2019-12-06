@@ -30,3 +30,9 @@ class GrownEvent(models.Model):
             models.Index(fields=['transaction_hash']),
             models.Index(fields=['plant_id'])
         ]
+
+
+class BlockHeight(models.Model):
+    block_height = models.CharField(max_length=78)
+    time = models.DateTimeField()
+    block_hash = models.CharField(max_length=66)
