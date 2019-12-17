@@ -67,3 +67,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'public_address', 'nonce']
+
+class GreenSeriazlizer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['greens']

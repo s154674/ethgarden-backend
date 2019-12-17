@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'customauth',
     'events',
     'plants',
+    'badges',
 ]
 
 MIDDLEWARE = [
