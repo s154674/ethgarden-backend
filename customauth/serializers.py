@@ -27,15 +27,18 @@ class SignatureObtainTokenPairSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         signature, nonce = None, None
-        request = self.context.get("request")
+        request = self.context.get('request')
         signature = request.data.get('signature')
         nonce = request.data.get('nonce')
+        address = request.data.get('address')
         if not signature or not nonce:
             raise exceptions.AuthenticationFailed(detail="signature and nonce fields required", code=400)
             
         # Get address from signature and nonce
-        address = Address.fromSignatureAndNonce(self, signature=signature, nonce=nonce)
+        address_from_sig = Address.fromSignatureAndNonce(self, signature=signature, nonce=nonce)
         #TODO Do a check that it's a valid ethereum address 
+        if not address == address_from_sig:
+            raise exceptions.AuthenticationFailed(detail="Address returned from signature check is not right", code=400)
 
         # Retrive user with that address, or create a new user with that address
         try: 
