@@ -53,9 +53,9 @@ parsimonious==0.8.1
 protobuf==3.10.0
 pycryptodome==3.9.1
 pylint==2.4.3
-pypiwin32==223
+#pypiwin32==223
 pyrsistent==0.15.5
-pywin32==225
+#pywin32==225
 requests==2.22.0
 requests-cache==0.5.2
 rlp==1.1.0
