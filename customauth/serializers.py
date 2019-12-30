@@ -31,12 +31,13 @@ class SignatureObtainTokenPairSerializer(serializers.Serializer):
         signature = request.data.get('signature')
         nonce = request.data.get('nonce')
         address = request.data.get('address')
-        if not signature or not nonce:
-            raise exceptions.AuthenticationFailed(detail="signature and nonce fields required", code=400)
+        if not signature or not nonce or not address:
+            raise exceptions.AuthenticationFailed(detail="signature, nonce and address fields required", code=400)
             
         # Get address from signature and nonce
         address_from_sig = Address.fromSignatureAndNonce(self, signature=signature, nonce=nonce)
-        #TODO Do a check that it's a valid ethereum address 
+
+        # Do a check that the returned address is the same
         if not address == address_from_sig:
             raise exceptions.AuthenticationFailed(detail="Address returned from signature check is not right", code=400)
 
