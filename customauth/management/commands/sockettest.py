@@ -38,7 +38,7 @@ class Command(BaseCommand):
                 owner=event['args']['to'],
                 last_green_calc=event['blockNumber'],
                 value=plant_list[1],
-                plantTime=plant_list[2],
+                plant_time=plant_list[2],
                 erc20_address=plant_list[3])
                 plant.save()
             else:
