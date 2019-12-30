@@ -11,6 +11,7 @@ import json
 from hexbytes import HexBytes
 from datetime import datetime
 import pytz
+import sys, os
 
 class Command(BaseCommand):
 
@@ -103,7 +104,7 @@ class Command(BaseCommand):
         
         print("web3 is connected:", web3.isConnected())
 
-        with open("C:/Users/johan/Projects/ethGarden.io/client/src/contracts/PlantBase.json") as plantbase:
+        with open(os.path.join(sys.path[0], 'PlantBase.json')) as plantbase:
             plantdict = json.load(plantbase)
             abi = plantdict['abi']
             plant_address = plantdict['networks']['5777']['address']
