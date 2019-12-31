@@ -52,3 +52,10 @@ web3==5.2.2
 websockets==7.0
 wrapt==1.11.2
 zipp==0.6.0
+#Serverstuff
+gunicorn==20.0.4
+psycopg2-binary==2.8.4
+
+#Windows stuff
+#pypiwin32==223
+#pywin32==225
