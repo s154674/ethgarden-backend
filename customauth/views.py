@@ -6,7 +6,7 @@ from customauth.serializers import ObtainTokenPairSerializer, SignatureObtainTok
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from customauth.models import User
 from plants.models import Plant
-from events.models import BlockHeight
+from events.models import BlockCheckSingleton
 from customauth.custom_permission import OwnerOrReadOnly2
 
 
@@ -41,15 +41,15 @@ class GreenDetial(generics.RetrieveAPIView):
     lookup_field = 'public_address'
 
     def get(self, request, *args, **kwargs):
-        block_height = BlockHeight.objects.all().order_by("-pk")[0]
+        block_height = BlockCheckSingleton.objects.get()
         user_pubkey = self.kwargs['public_address'] 
         user = User.objects.get(public_address=user_pubkey)
         plants = Plant.objects.filter(owner=user_pubkey)
 
         for plant in plants:
-            if plant.last_green_calc < block_height.block_height:
-                user.greens = user.greens + ((int(block_height.block_height) - int(plant.last_green_calc)) * plant.greens_per_block)
-                plant.last_green_calc = block_height.block_height
+            if plant.last_green_calc < block_height.highest_block_checked:
+                user.greens = user.greens + ((int(block_height.highest_block_checked) - int(plant.last_green_calc)) * plant.greens_per_block)
+                plant.last_green_calc = block_height.highest_block_checked
                 plant.save()
         user.save()
 

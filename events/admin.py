@@ -1,5 +1,6 @@
 from django.contrib import admin
-from events.models import GrownEvent, TransferEvent, BlockHeight
+from events.models import GrownEvent, TransferEvent, BlockCheckSingleton
+from solo.admin import SingletonModelAdmin
 
 # Register your models here.
 class GrownEventAdmin(admin.ModelAdmin):
@@ -14,4 +15,4 @@ class BlockHeightAdmin(admin.ModelAdmin):
 
 admin.site.register(GrownEvent, GrownEventAdmin)
 admin.site.register(TransferEvent, TransferEventAdmin)
-admin.site.register(BlockHeight, BlockHeightAdmin)
+admin.site.register(BlockCheckSingleton, SingletonModelAdmin)

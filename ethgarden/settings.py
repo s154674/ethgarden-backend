@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'solo',
     'customauth',
     'events',
     'plants',
@@ -146,12 +147,30 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
+# Cors for localhost
 CORS_ORIGIN_ALLOW_ALL = False
 
 CORS_ORIGIN_WHITELIST = (
        'http://localhost:3000',
        'https://localhost:3000',
 )
+
+# Singleton Cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    },
+    'local': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+}
+
+SOLO_CACHE = 'local'
+
+SOLO_CACHE_TIMEOUT = 60*5
+
+SOLO_CACHE_PREFIX = 'solo'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

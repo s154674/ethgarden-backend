@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from customauth.models import User
 from plants.models import Plant
-from events.models import TransferEvent, GrownEvent
+from events.models import TransferEvent, GrownEvent, BlockCheckSingleton
 from django.core.exceptions import ObjectDoesNotExist
 from web3.exceptions import BadFunctionCallOutput
 from threading import Thread
@@ -61,64 +61,50 @@ class Command(BaseCommand):
             print('plant not yet planted')
         
         
-    def log_loop(self, transfer_filter, grown_filter, poll_interval, contract, web3):
+    def get_new_events(self, transfer_filter, grown_filter, poll_interval, contract, web3):
         # Rerun existing entries + get block height
+        latest_block = web3.eth.getBlock('latest')
+
         for event in transfer_filter.get_all_entries():
             self.handle_transfer_event(event, contract)
         
         for event in grown_filter.get_all_entries():
             self.handle_grown_event(event)
         
-        latest_block = web3.eth.getBlock('latest')
-        if not BlockHeight.objects.all():
-            block_height = self.handle_new_block(web3, latest_block)
-        else:
-            block_height = BlockHeight.objects.all().order_by("-pk")[0]
-        
-        # Check for new stuff periodically
-        while True:
-            for event in transfer_filter.get_new_entries():
-                self.handle_transfer_event(event, contract)
-            for event in grown_filter.get_new_entries():
-                self.handle_grown_event(event)
-            
-            latest_block = web3.eth.getBlock('latest')
-            if int(block_height.block_height) < latest_block.number:
-                block_height = self.handle_new_block(web3, latest_block)
-            
-            time.sleep(poll_interval)
-            print("yes") # TODO something else to handle livelyness
+        block_check = BlockCheckSingleton.objects.get()
+        block_check.highest_block_checked = str(latest_block.number)
+        block_check.save()
+       
 
     def main(self, transfer_filter, grown_filter, contract, web3):
-        # block_filter = web3.eth.filter('latest')
-        self.log_loop(transfer_filter, grown_filter, 2, contract, web3)
+        self.get_new_events(transfer_filter, grown_filter, 2, contract, web3)
 
-    def handle_new_block(self, web3, latest_block):
-        block_height = BlockHeight(block_height=latest_block.number, time=datetime.utcfromtimestamp(latest_block.timestamp).replace(tzinfo=pytz.utc), block_hash=HexBytes(latest_block.hash).hex())
-        block_height.save()
-        return block_height
-
- 
-    def handle(self, *args, **options):
-        print("old block height model got deprecated, use getevents command instead.")
-        # web3 = Web3(Web3.WebsocketProvider('wss://ropsten.infura.io/ws/v3/d7a6df9d7430479b82c20fa9c462d964', websocket_kwargs={'timeout':60}))
-        
-        # print("web3 is connected:", web3.isConnected())
-
-        # with open(os.path.join(sys.path[0], 'PlantBase.json')) as plantbase:
-        #     plantdict = json.load(plantbase)
-        #     abi = plantdict['abi']
-        #     plant_address = plantdict['networks']['5777']['address']
-
-        # plant_address = "0x25F7f77ce006C2F5BeC35d8D4a820e3Ad47f1d90"
-        # # print(abi)
-    
-        # contract = web3.eth.contract(address=plant_address, abi=abi)
-        # transfer_filter = contract.events.Transfer.createFilter(fromBlock=6889000)
-        # grown_filter = contract.events.Grown.createFilter(fromBlock=6889000)
-        
-        # self.main(transfer_filter, grown_filter, contract, web3)
                 
+    def handle(self, *args, **options):
+        try:
+            block_check = BlockCheckSingleton.objects.get()
+        except ObjectDoesNotExist:
+            stuff = BlockCheckSingleton(highest_block_checked=6889000)
+            stuff.save()
+            block_check = BlockCheckSingleton.objects.get()
 
+        if (int(block_check.highest_block_checked) < 6889000):
+            block_check.highest_block_checked = 6889000
+        start_block = int(block_check.highest_block_checked)
+        print(start_block)
 
+        web3 = Web3(Web3.WebsocketProvider('wss://ropsten.infura.io/ws/v3/d7a6df9d7430479b82c20fa9c462d964', websocket_kwargs={'timeout':60}))
+
+        with open(os.path.join(sys.path[0], 'PlantBase.json')) as plantbase:
+            plantdict = json.load(plantbase)
+            abi = plantdict['abi']
+            
+        plant_address = "0x25F7f77ce006C2F5BeC35d8D4a820e3Ad47f1d90"
+    
+        contract = web3.eth.contract(address=plant_address, abi=abi)
+
+        transfer_filter = contract.events.Transfer.createFilter(fromBlock=start_block)
+        grown_filter = contract.events.Grown.createFilter(fromBlock=start_block)
+
+        self.main(transfer_filter, grown_filter, contract, web3)
 

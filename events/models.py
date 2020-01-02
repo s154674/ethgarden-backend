@@ -1,4 +1,5 @@
 from django.db import models
+from solo.models import SingletonModel
 
 # Create your models here.
 class TransferEvent(models.Model):
@@ -32,7 +33,5 @@ class GrownEvent(models.Model):
         ]
 
 
-class BlockHeight(models.Model):
-    block_height = models.CharField(max_length=78)
-    time = models.DateTimeField()
-    block_hash = models.CharField(max_length=66)
+class BlockCheckSingleton(SingletonModel):
+    highest_block_checked = models.CharField(max_length=78, default='6889000')
