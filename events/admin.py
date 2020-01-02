@@ -9,10 +9,6 @@ class GrownEventAdmin(admin.ModelAdmin):
 class TransferEventAdmin(admin.ModelAdmin):
     pass
 
-class BlockHeightAdmin(admin.ModelAdmin):
-    pass
-
-
 admin.site.register(GrownEvent, GrownEventAdmin)
 admin.site.register(TransferEvent, TransferEventAdmin)
 admin.site.register(BlockCheckSingleton, SingletonModelAdmin)
