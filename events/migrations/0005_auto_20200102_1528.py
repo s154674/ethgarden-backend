@@ -6,13 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('events', '0005_auto_20200102_1458'),
+        ('events', '0004_auto_20200102_1458'),
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='BlockHeight',
-        ),
         migrations.AlterField(
             model_name='blockchecksingleton',
             name='highest_block_checked',
