@@ -19,7 +19,7 @@ class PlantList(generics.ListAPIView):
 
     def get_queryset(self):
         owner = self.kwargs['owner']
-        return Plant.objects.filter(owner=owner)
+        return Plant.objects.filter(owner=owner).order_by('pk')
 
 class PlantDetail(generics.RetrieveAPIView):
     permission_classes = (OwnerOrReadOnly2,)
