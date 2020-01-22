@@ -8,6 +8,8 @@ from plants.serializers import PlantSerializer
 from plants.models import Plant
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
 
 
 # Create your views here.
@@ -19,7 +21,8 @@ class PlantList(generics.ListAPIView):
 
     def get_queryset(self):
         owner = self.kwargs['owner']
-        return Plant.objects.filter(owner=owner).order_by('pk')
+        # return Plant.objects.filter(owner=owner).order_by('pk')
+        return Plant.objects.filter(owner=owner).annotate(pk_int=Cast('pk', IntegerField())).order_by('pk_int')
 
 class PlantDetail(generics.RetrieveAPIView):
     permission_classes = (OwnerOrReadOnly2,)
