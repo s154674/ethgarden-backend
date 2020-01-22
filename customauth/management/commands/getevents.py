@@ -40,6 +40,17 @@ class Command(BaseCommand):
                 value=plant_list[1],
                 plant_time=plant_list[2],
                 erc20_address=plant_list[3])
+
+                # Less than 0.1 
+                if (plant.value < 10**17):
+                    plant.greens_per_block = 1
+                # <= 0.1 and < 1
+                elif (10**17 <= plant.value < 10**18):
+                    plant.greens_per_block = 10
+                # >= 1
+                elif (plant.value >= 10**18):
+                    plant.greens_per_block = 100
+
                 plant.save()
             else:
                 # TODO Handle: You cant find it in the database + the sender is not 0 address
@@ -54,6 +65,8 @@ class Command(BaseCommand):
             plant = Plant.objects.get(plant_id=event['args']['plantId'])
             if (plant.seed == ""):
                 plant.seed = int(event['args']['stats'])
+                # Simple greens per block radomizer, takes the "seed" generated modulo 100
+                plant.greens_per_block = plant.greens_per_block * int(plant.seed) % 100
                 plant.save()
             else:
                 pass # GrownEvent already handled
