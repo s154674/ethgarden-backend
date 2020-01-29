@@ -66,7 +66,9 @@ class Command(BaseCommand):
             if (plant.seed == ""):
                 plant.seed = int(event['args']['stats'])
                 # Simple greens per block radomizer, takes the "seed" generated modulo 100
-                plant.greens_per_block = plant.greens_per_block * int(plant.seed) % 100
+                temp = plant.greens_per_block * int(plant.seed) % 100
+                if temp != 0:
+                    plant.greens_per_block = temp
                 plant.save()
             else:
                 pass # GrownEvent already handled
@@ -106,16 +108,21 @@ class Command(BaseCommand):
         start_block = int(block_check.highest_block_checked)
         print(start_block)
 
+        # Instantiate web3
         web3 = Web3(Web3.WebsocketProvider('wss://ropsten.infura.io/ws/v3/d7a6df9d7430479b82c20fa9c462d964', websocket_kwargs={'timeout':60}))
 
+        # Get smart contract ABI
         with open(os.path.join(sys.path[0], 'PlantBase.json')) as plantbase:
             plantdict = json.load(plantbase)
             abi = plantdict['abi']
-            
+        
+        # Smart contract address on the Ropsten testnet
         plant_address = "0x25F7f77ce006C2F5BeC35d8D4a820e3Ad47f1d90"
-    
+
+        # Contract instance
         contract = web3.eth.contract(address=plant_address, abi=abi)
 
+        # Filters
         transfer_filter = contract.events.Transfer.createFilter(fromBlock=start_block)
         grown_filter = contract.events.Grown.createFilter(fromBlock=start_block)
 
